@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Share2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { downloadImageBlob } from "@/services/shareCardService";
 
 /**
  * Fires an async PNG-generation callback and downloads the result.
@@ -25,7 +26,6 @@ export function ShareButton({
     setBusy(true);
     try {
       const blob = await onGenerate();
-      const { downloadImageBlob } = await import("@/services/shareCardService");
       downloadImageBlob(blob, filename);
     } finally {
       setBusy(false);

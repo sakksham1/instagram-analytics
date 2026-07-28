@@ -107,6 +107,9 @@ export function WrappedPage() {
   // Guard clause comes last — after every hook above has already run.
   if (!parsedExport || !result) return <Navigate to="/" replace />;
 
+  const currentSlide = slides[index];
+  if (!currentSlide) return <Navigate to="/analysis" replace />;
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-ink-950">
       <StoryProgress count={slides.length} activeIndex={index} progress={progress} />
@@ -143,7 +146,7 @@ export function WrappedPage() {
               className="pointer-events-auto"
             >
               <WrappedSlideView
-                slide={slides[index]}
+                slide={currentSlide}
                 onContinue={() => navigate("/analysis")}
               />
             </motion.div>

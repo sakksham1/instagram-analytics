@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { InstagramProfile } from "@/types/results";
 
 function CopyButton({ username }: { username: string }) {
@@ -23,7 +24,13 @@ function CopyButton({ username }: { username: string }) {
 
 export function ResultsList({ profiles }: { profiles: InstagramProfile[] }) {
   if (profiles.length === 0) {
-    return <p className="py-10 text-center text-sm text-ink-400">No matches.</p>;
+    return (
+      <EmptyState
+        icon={SearchX}
+        title="No matches"
+        description="Try a different search term, or switch tabs — this list is empty for the current filter."
+      />
+    );
   }
 
   return (

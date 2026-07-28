@@ -6,6 +6,7 @@ import { SummaryCards } from "@/features/follower-analysis/components/SummaryCar
 import { SearchBar } from "@/features/follower-analysis/components/SearchBar";
 import { ResultsList } from "@/features/follower-analysis/components/ResultsList";
 import { Button } from "@/components/ui/button";
+import { Tabs } from "@/components/ui/tabs";
 import { exportProfilesAsCsv, exportProfilesAsTxt } from "@/services/exportService";
 
 const TABS: { key: ResultTab; label: string }[] = [
@@ -35,21 +36,11 @@ export function FollowerAnalysisPage() {
       <SummaryCards counts={result.counts} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-1 rounded-md bg-ink-900 p-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`rounded-sm px-3 py-1.5 text-sm transition-colors ${
-                activeTab === tab.key
-                  ? "bg-ink-700 text-ink-50"
-                  : "text-ink-400 hover:text-ink-50"
-              }`}
-            >
-              {tab.label} ({result[tab.key].length})
-            </button>
-          ))}
-        </div>
+        <Tabs
+          items={TABS.map((tab) => ({ ...tab, count: result[tab.key].length }))}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
         <div className="flex gap-2">
           <Button
             variant="secondary"

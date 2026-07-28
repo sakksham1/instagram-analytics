@@ -1,10 +1,18 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function Card({
+  className,
+  interactive,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { interactive?: boolean }) {
   return (
     <div
-      className={cn("rounded-lg border border-ink-700 bg-ink-900 p-5", className)}
+      className={cn(
+        "rounded-lg border border-ink-700 bg-ink-900 p-5 transition-colors",
+        interactive && "cursor-pointer hover:border-ink-600 hover:bg-ink-800",
+        className,
+      )}
       {...props}
     />
   );

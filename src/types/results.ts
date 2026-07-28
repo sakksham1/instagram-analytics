@@ -30,3 +30,36 @@ export interface FollowerComparisonResult {
     notFollowedBack: number;
   };
 }
+
+/**
+ * A user-initiated, point-in-time capture of a ParsedExport, persisted
+ * locally (see `src/app/snapshotStore.ts`) so the unfollowers-tracker
+ * feature can diff "then" vs "now". Nothing about this is automatic —
+ * a snapshot only exists because someone clicked "Save snapshot".
+ */
+export interface ExportSnapshot {
+  id: string;
+  /** User-facing label; defaults to a formatted timestamp if not set. */
+  label: string;
+  /** Unix milliseconds. */
+  capturedAt: number;
+  parsedExport: ParsedExport;
+}
+
+/** Set-difference between two ParsedExport snapshots, by username. */
+export interface SnapshotDiffResult {
+  newFollowers: InstagramProfile[]; // started following you
+  lostFollowers: InstagramProfile[]; // unfollowed you
+  newFollowing: InstagramProfile[]; // you started following
+  lostFollowing: InstagramProfile[]; // you unfollowed
+}
+
+/** A single "this person unfollowed you" event, anchored to the snapshot
+ * pair it was detected between, for display in a chronological list. */
+export interface UnfollowerEvent {
+  username: string;
+  profileUrl?: string;
+  fromSnapshotId: string;
+  toSnapshotId: string;
+  toSnapshotCapturedAt: number;
+}

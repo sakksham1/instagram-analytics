@@ -1,22 +1,24 @@
+import { Users, UserCheck, Repeat, UserMinus, UserPlus } from "lucide-react";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { formatCount } from "@/utils/formatters";
 import type { FollowerComparisonResult } from "@/types/results";
 
-export function SummaryCards({ counts }: { counts: FollowerComparisonResult["counts"] }) {
-  const items = [
-    { label: "Followers", value: counts.followers },
-    { label: "Following", value: counts.following },
-    { label: "Mutual", value: counts.mutual },
-    { label: "Don't follow back", value: counts.notFollowingBack },
-    { label: "Not followed back", value: counts.notFollowedBack },
-  ];
+const ITEMS = [
+  { key: "followers", label: "Followers", icon: Users, tone: "text-ink-50" },
+  { key: "following", label: "Following", icon: UserCheck, tone: "text-ink-50" },
+  { key: "mutual", label: "Mutual", icon: Repeat, tone: "text-signal-mutual" },
+  { key: "notFollowingBack", label: "Don't follow back", icon: UserMinus, tone: "text-signal-lost" },
+  { key: "notFollowedBack", label: "Not followed back", icon: UserPlus, tone: "text-signal-gained" },
+] as const;
 
+export function SummaryCards({ counts }: { counts: FollowerComparisonResult["counts"] }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-      {items.map((item) => (
-        <Card key={item.label} className="text-center">
-          <CardTitle className="font-mono">{formatCount(item.value)}</CardTitle>
-          <CardDescription>{item.label}</CardDescription>
+      {ITEMS.map(({ key, label, icon: Icon, tone }) => (
+        <Card key={key} className="flex flex-col items-center gap-1 text-center">
+          <Icon className={`h-4 w-4 ${tone}`} aria-hidden />
+          <CardTitle className={`font-mono ${tone}`}>{formatCount(counts[key])}</CardTitle>
+          <CardDescription>{label}</CardDescription>
         </Card>
       ))}
     </div>

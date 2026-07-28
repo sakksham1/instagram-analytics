@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UploadPage } from "@/features/upload/pages/UploadPage";
 import { FollowerAnalysisPage } from "@/features/follower-analysis/pages/FollowerAnalysisPage";
+import { UnfollowersPage } from "@/features/unfollowers-tracker/pages/UnfollowersPage";
 
 /**
  * HashRouter is used deliberately: this app can be opened as a static file
@@ -19,6 +20,7 @@ export function AppRouter() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<UploadPage />} />
           <Route path="/analysis" element={<FollowerAnalysisPage />} />
+          <Route path="/unfollowers" element={<UnfollowersPage />} />
           {/* TODO(future): /growth, /timeline, /compare, /settings, etc. */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

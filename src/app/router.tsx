@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { UploadPage } from "@/features/upload/pages/UploadPage";
 import { FollowerAnalysisPage } from "@/features/follower-analysis/pages/FollowerAnalysisPage";
 import { UnfollowersPage } from "@/features/unfollowers-tracker/pages/UnfollowersPage";
+import { WrappedPage } from "@/features/wrapped/pages/WrappedPage";
 
 /**
  * HashRouter is used deliberately: this app can be opened as a static file
@@ -17,6 +18,8 @@ export function AppRouter() {
   return (
     <HashRouter>
       <Routes>
+        {/* Full-bleed, no header/chrome — deliberately outside AppLayout */}
+        <Route path="/wrapped" element={<WrappedPage />} />
         <Route element={<AppLayout />}>
           <Route path="/" element={<UploadPage />} />
           <Route path="/analysis" element={<FollowerAnalysisPage />} />

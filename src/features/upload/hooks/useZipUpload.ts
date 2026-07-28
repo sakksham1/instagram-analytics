@@ -24,7 +24,7 @@ export function useZipUpload() {
       try {
         const parsed = await parseInstagramExport(file);
         setParsedExport(parsed, file);
-        navigate("/analysis");
+        navigate("/wrapped");
       } catch (err) {
         setState({
           status: "error",

@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { useCountUp } from "@/hooks/useCountUp";
 import { formatCount } from "@/utils/formatters";
+import { ShareButton } from "@/components/ui/share-button";
+import { renderStatCard } from "@/services/shareCardService";
 import type { WrappedSlide } from "@/features/wrapped/hooks/useWrappedSlides";
 
 const TONE_CLASS: Record<string, string> = {
@@ -67,6 +69,24 @@ function StatSlide({ slide }: { slide: Extract<WrappedSlide, { kind: "stat" }> }
       </motion.span>
       <p className="text-xl text-ink-50">{slide.label}</p>
       {slide.sublabel && <p className="max-w-xs text-sm text-ink-400">{slide.sublabel}</p>}
+
+      {/* Stop-propagation: this sits inside the full-screen tap-to-advance
+         zone (see WrappedPage), so without this a tap here would also
+          advance the slide instead of triggering the download. */}
+      <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+        <ShareButton
+          label="Share this stat"
+          filename={`${slide.key}.png`}
+          onGenerate={() =>
+            renderStatCard({
+              value: slide.value,
+              label: slide.label,
+              sublabel: slide.sublabel,
+              tone: slide.tone,
+            })
+          }
+        />
+      </div>
     </div>
   );
 }

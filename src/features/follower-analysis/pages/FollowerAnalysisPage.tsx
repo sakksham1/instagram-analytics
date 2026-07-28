@@ -7,8 +7,10 @@ import { SummaryCards } from "@/features/follower-analysis/components/SummaryCar
 import { SearchBar } from "@/features/follower-analysis/components/SearchBar";
 import { ResultsList } from "@/features/follower-analysis/components/ResultsList";
 import { Button } from "@/components/ui/button";
+import { ShareButton } from "@/components/ui/share-button";
 import { Tabs } from "@/components/ui/tabs";
 import { exportProfilesAsCsv, exportProfilesAsTxt } from "@/services/exportService";
+import { renderSummaryCard } from "@/services/shareCardService";
 
 const TABS: { key: ResultTab; label: string }[] = [
   { key: "notFollowingBack", label: "You don't follow back" },
@@ -39,14 +41,21 @@ export function FollowerAnalysisPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <motion.h1
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="font-display text-2xl text-ink-50 sm:text-3xl"
-      >
-        {headline}
-      </motion.h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <motion.h1
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="font-display text-2xl text-ink-50 sm:text-3xl"
+        >
+          {headline}
+        </motion.h1>
+        <ShareButton
+          label="Share your recap"
+          filename="instagram-recap.png"
+          onGenerate={() => renderSummaryCard({ counts: result.counts })}
+        />
+      </div>
       <SummaryCards counts={result.counts} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">

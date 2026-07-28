@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Navigate } from "react-router-dom";
 import { Download, FileText } from "lucide-react";
 import { useExportStore } from "@/app/exportStore";
@@ -10,9 +11,9 @@ import { Tabs } from "@/components/ui/tabs";
 import { exportProfilesAsCsv, exportProfilesAsTxt } from "@/services/exportService";
 
 const TABS: { key: ResultTab; label: string }[] = [
-  { key: "notFollowingBack", label: "Don't follow back" },
-  { key: "notFollowedBack", label: "Not followed back" },
-  { key: "mutual", label: "Mutual" },
+  { key: "notFollowingBack", label: "You don't follow back" },
+  { key: "notFollowedBack", label: "Not following you back" },
+  { key: "mutual", label: "Mutual 🤝" },
 ];
 
 export function FollowerAnalysisPage() {
@@ -31,8 +32,21 @@ export function FollowerAnalysisPage() {
   // export store is intentionally in-memory-only for privacy) -> back to upload.
   if (!parsedExport) return <Navigate to="/" replace />;
 
+  const headline =
+    result.counts.notFollowingBack === 0
+      ? "Everyone follows you back. Clean sheet. 🎉"
+      : `${result.counts.notFollowingBack} people don't follow you back 👀`;
+
   return (
     <div className="flex flex-col gap-6">
+      <motion.h1
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="font-display text-2xl text-ink-50 sm:text-3xl"
+      >
+        {headline}
+      </motion.h1>
       <SummaryCards counts={result.counts} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -60,7 +74,9 @@ export function FollowerAnalysisPage() {
       </div>
 
       <SearchBar value={query} onChange={setQuery} />
-      <ResultsList profiles={activeList} />
+      <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <ResultsList profiles={activeList} />
+      </motion.div>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { Check, Copy, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,8 +36,14 @@ export function ResultsList({ profiles }: { profiles: InstagramProfile[] }) {
 
   return (
     <ul className="divide-y divide-ink-800">
-      {profiles.map((profile) => (
-        <li key={profile.username} className="flex items-center justify-between py-2">
+      {profiles.map((profile, i) => (
+        <motion.li
+          key={profile.username}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.25, delay: Math.min(i, 20) * 0.02 }}
+          className="flex items-center justify-between py-2"
+        >
           {profile.profileUrl ? (
             <a
               href={profile.profileUrl}
@@ -50,7 +57,7 @@ export function ResultsList({ profiles }: { profiles: InstagramProfile[] }) {
             <span className="text-sm text-ink-50">@{profile.username}</span>
           )}
           <CopyButton username={profile.username} />
-        </li>
+        </motion.li>
       ))}
     </ul>
   );

@@ -3,21 +3,29 @@ import type { ParsedExport } from "@/types/results";
 
 /**
  * Minimal in-memory store holding the currently-loaded export, shared
- * between the `upload` feature (writes) and `follower-analysis` feature
- * (reads). Lives at the app level — not inside either feature — because
- * more than one feature module depends on it, and future features
- * (compare-two-exports, growth-over-time) will too.
+ * between `upload` (writes) and `follower-analysis` (reads).
  *
- * Deliberately NOT persisted to localStorage/IndexedDB in V1: keeping
- * parsed data in memory only, cleared on refresh, is a stronger privacy
- * default. A future "save analysis locally" feature should be an
- * explicit opt-in, not silent persistence.
+ * Also retains the original source File — not its contents, just the
+ * handle — so future features that need other parts of the export
+ * (message history, growth-over-time snapshots, etc.) can reopen it with
+ * `openArchive` (src/parser/zip/zipReader.ts) and selectively read
+ * whatever new files they need, without asking the user to re-upload.
+ * See src/parser/registry.ts for the selective-read pattern to follow
+ * when adding a new reader.
+ *
+ * Deliberately NOT persisted to localStorage/IndexedDB in V1: cleared on
+ * refresh, same as before.
  */
-let currentExport: ParsedExport | null = null;
+interface ExportState {
+  parsedExport: ParsedExport | null;
+  sourceFile: File | null;
+}
+
+let state: ExportState = { parsedExport: null, sourceFile: null };
 const listeners = new Set<() => void>();
 
-function setParsedExport(next: ParsedExport | null) {
-  currentExport = next;
+function setParsedExport(next: ParsedExport | null, sourceFile: File | null = null) {
+  state = { parsedExport: next, sourceFile: next ? sourceFile : null };
   listeners.forEach((listener) => listener());
 }
 
@@ -27,13 +35,16 @@ function subscribe(listener: () => void) {
 }
 
 function getSnapshot() {
-  return currentExport;
+  return state;
 }
 
-export function useExportStore<T>(selector: (state: {
-  parsedExport: ParsedExport | null;
-  setParsedExport: (next: ParsedExport | null) => void;
-}) => T): T {
-  const parsedExport = useSyncExternalStore(subscribe, getSnapshot);
-  return selector({ parsedExport, setParsedExport });
+export function useExportStore<T>(
+  selector: (state: {
+    parsedExport: ParsedExport | null;
+    sourceFile: File | null;
+    setParsedExport: (next: ParsedExport | null, sourceFile?: File | null) => void;
+  }) => T,
+): T {
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot);
+  return selector({ ...snapshot, setParsedExport });
 }

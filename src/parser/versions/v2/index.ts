@@ -1,16 +1,7 @@
 import { z } from "zod";
-import type { ExportParser } from "@/parser/types";
+import type { ExportParser, FileSelection } from "@/parser/types";
 import { ParserError } from "@/parser/types";
 import type { ParsedExport } from "@/types/results";
-
-/**
- * Parser V2: Instagram's export format as of 2026. Same overall layout
- * as v1 (bare array for followers, `relationships_following` wrapper
- * for following), but `string_list_data` entries no longer always
- * include `value` — the username now lives on the item's `title`, and
- * `href` points through an `/_u/<username>` redirect instead of
- * straight at the profile.
- */
 
 const listEntrySchema = z.object({
   href: z.string().optional(),
@@ -31,18 +22,8 @@ const followingFileSchema = z.object({
 
 type ListItem = z.infer<typeof listItemSchema>;
 
-function findFollowersFile(files: Map<string, unknown>): unknown | undefined {
-  for (const [name, content] of files) {
-    if (/followers.*\.json$/i.test(name)) return content;
-  }
-  return undefined;
-}
-
-function findFollowingFile(files: Map<string, unknown>): unknown | undefined {
-  for (const [name, content] of files) {
-    if (/following\.json$/i.test(name)) return content;
-  }
-  return undefined;
+function findPath(paths: string[], pattern: RegExp): string | undefined {
+  return paths.find((path) => pattern.test(path));
 }
 
 function usernameFromHref(href?: string): string | undefined {
@@ -58,10 +39,8 @@ function toProfiles(items: ListItem[]) {
       if (!username) return undefined;
       return {
         username,
-        // Only trust the raw href when it's an old-style direct link
-        // (i.e. `value` was present); otherwise build a clean profile URL
-        // instead of the `/_u/` redirect link.
-        profileUrl: entry?.value && entry.href ? entry.href : `https://www.instagram.com/${username}`,
+        profileUrl:
+          entry?.value && entry.href ? entry.href : `https://www.instagram.com/${username}`,
         followedOrFollowingSince: entry?.timestamp,
       };
     })
@@ -72,25 +51,19 @@ export const v2Parser: ExportParser = {
   id: "v2",
   label: "Instagram export (2026 format)",
 
-  canParse(files) {
-    const followers = findFollowersFile(files);
-    const following = findFollowingFile(files);
-    if (!followers || !following) return false;
-    return (
-      followersFileSchema.safeParse(followers).success &&
-      followingFileSchema.safeParse(following).success
-    );
+  selectFiles(paths): FileSelection | null {
+    const followers = findPath(paths, /followers.*\.json$/i);
+    const following = findPath(paths, /following\.json$/i);
+    if (!followers || !following) return null;
+    return { followers, following };
   },
 
   parse(files): ParsedExport {
-    const rawFollowers = findFollowersFile(files);
-    const rawFollowing = findFollowingFile(files);
-
-    const followersResult = followersFileSchema.safeParse(rawFollowers);
+    const followersResult = followersFileSchema.safeParse(files.get("followers"));
     if (!followersResult.success) {
       throw new ParserError("followers file did not match expected shape", "v2");
     }
-    const followingResult = followingFileSchema.safeParse(rawFollowing);
+    const followingResult = followingFileSchema.safeParse(files.get("following"));
     if (!followingResult.success) {
       throw new ParserError("following file did not match expected shape", "v2");
     }

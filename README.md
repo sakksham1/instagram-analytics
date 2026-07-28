@@ -132,7 +132,7 @@ implementations.
 ## Tech stack
 
 React, TypeScript, Vite, Tailwind CSS, React Router, shadcn/ui-style
-primitives, JSZip, Zod, Vitest, ESLint, Prettier.
+primitives, zip.js, Zod, Vitest, ESLint, Prettier.
 
 ## License
 

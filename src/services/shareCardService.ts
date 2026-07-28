@@ -129,13 +129,13 @@ export async function renderStatCard(options: StatCardOptions): Promise<Blob> {
   // Label
   ctx.fillStyle = "#f5f6f8";
   ctx.font = "600 56px Inter, sans-serif";
-  let y = wrapText(ctx, options.label, WIDTH / 2, HEIGHT * 0.42 + 100, WIDTH - 160, 68);
+  const labelBottomY = wrapText(ctx, options.label, WIDTH / 2, HEIGHT * 0.42 + 100, WIDTH - 160, 68);
 
   // Sublabel
   if (options.sublabel) {
     ctx.fillStyle = "#7c8493";
     ctx.font = "400 36px Inter, sans-serif";
-    wrapText(ctx, options.sublabel, WIDTH / 2, y + 70, WIDTH - 220, 48);
+    wrapText(ctx, options.sublabel, WIDTH / 2, labelBottomY + 70, WIDTH - 220, 48);
   }
 
   drawFooter(ctx);

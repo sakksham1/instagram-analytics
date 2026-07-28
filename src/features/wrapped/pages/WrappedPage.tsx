@@ -25,6 +25,11 @@ const EMPTY_COUNTS = {
  * full-bleed instead of sitting inside the normal page chrome. Never the
  * only way to reach results — the X button and the tap-anywhere-forward
  * pattern both drop straight into /analysis.
+ *
+ * IMPORTANT: every hook below runs unconditionally, on every render,
+ * regardless of whether parsedExport exists yet. The "no export loaded"
+ * case is handled only in the returned JSX at the very end, never via
+ * an early `return` before a hook call.
  */
 export function WrappedPage() {
   const parsedExport = useExportStore((s) => s.parsedExport);
@@ -49,10 +54,6 @@ export function WrappedPage() {
 
   const isLast = index === slides.length - 1;
 
-  const currentSlide = slides[index];
-
-  if (!currentSlide) return null;
-
   const goTo = useCallback(
     (next: number) => {
       setIndex(Math.max(0, Math.min(next, slides.length - 1)));
@@ -63,7 +64,12 @@ export function WrappedPage() {
   );
 
   useEffect(() => {
+    // No export loaded yet — nothing to animate through. Guarded inside
+    // the effect body (not around the hook call itself) so hook order
+    // never changes between renders.
+    if (!parsedExport || !result) return;
     if (isLast) return; // CTA slide waits for a tap, never auto-advances past itself
+
     startRef.current = performance.now();
 
     const tick = (now: number) => {
@@ -87,7 +93,7 @@ export function WrappedPage() {
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, isLast]);
+  }, [index, isLast, parsedExport, result]);
 
   const handlePress = (paused: boolean) => {
     pausedRef.current = paused;
@@ -98,6 +104,7 @@ export function WrappedPage() {
     }
   };
 
+  // Guard clause comes last — after every hook above has already run.
   if (!parsedExport || !result) return <Navigate to="/" replace />;
 
   return (
@@ -118,7 +125,6 @@ export function WrappedPage() {
         onPointerUp={() => handlePress(false)}
         onPointerLeave={() => handlePress(false)}
       >
-        {/* Tap zones: left third = back, right two-thirds = forward/continue */}
         <button aria-label="Previous" className="w-1/3" onClick={() => goTo(index - 1)} />
         <button
           aria-label="Next"
@@ -137,7 +143,7 @@ export function WrappedPage() {
               className="pointer-events-auto"
             >
               <WrappedSlideView
-                slide={currentSlide}
+                slide={slides[index]}
                 onContinue={() => navigate("/analysis")}
               />
             </motion.div>
